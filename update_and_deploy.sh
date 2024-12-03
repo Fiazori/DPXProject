@@ -2,8 +2,8 @@
 
 # Define variables
 REPO_DIR="."   # Replace with the path to your cloned repo
-DOCKER_IMAGE_NAME="dpxproject"  # Replace with your desired Docker image name
-DOCKER_CONTAINER_NAME="dpxproject"  # Replace with your desired container name
+DOCKER_IMAGE_NAME="dpx-service"  # Replace with your desired Docker image name
+DOCKER_CONTAINER_NAME="dpx-service"  # Replace with your desired container name
 LOG_FILE="deploy.log"  # Log file to store script output
 CHECK_INTERVAL=10              # Time interval in seconds (e.g., 300s = 5 minutes)
 
@@ -42,7 +42,7 @@ while true; do
 
         # Start the new container
         echo "$(date): Starting new container..." >> $LOG_FILE
-        docker run -d --name $DOCKER_CONTAINER_NAME -p 80:3000 -p 3001:3001 $DOCKER_IMAGE_NAME >> $LOG_FILE 2>&1
+        docker run -d --name $DOCKER_CONTAINER_NAME --network=DPX-Network -p 80:3000 -p 3001:3001 $DOCKER_IMAGE_NAME >> $LOG_FILE 2>&1
     else
         echo "$(date): No updates detected." >> $LOG_FILE
     fi
