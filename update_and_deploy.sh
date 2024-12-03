@@ -42,7 +42,7 @@ while true; do
 
         # Start the new container
         echo "$(date): Starting new container..." >> $LOG_FILE
-        docker run -d --name $DOCKER_CONTAINER_NAME --network=DPX-Network -p 80:3000 -p 3001:3001 $DOCKER_IMAGE_NAME >> $LOG_FILE 2>&1
+        docker run -d --name $DOCKER_CONTAINER_NAME --network host $DOCKER_IMAGE_NAME >> $LOG_FILE 2>&1
     else
         echo "$(date): No updates detected." >> $LOG_FILE
     fi
