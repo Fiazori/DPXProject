@@ -51,7 +51,7 @@ const SignupPage = () => {
         setError('');
         setSuccess('');
         try {
-            await axios.post('https://localhost:3001/api/verification/send-code', {
+            await axios.post('http://localhost:3001/api/verification/send-code', {
                 email: formData.email,
                 code_type: 'R',
             });
@@ -75,7 +75,7 @@ const SignupPage = () => {
         setError('');
         setSuccess('');
         try {
-            await axios.post('https://localhost:3001/api/auth/register', formData);
+            await axios.post('http://localhost:3001/api/auth/register', formData);
             setSuccess('Registration successful! Please login.');
             setEmailSent(false); // 重置状态
         } catch (err) {

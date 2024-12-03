@@ -1,3 +1,4 @@
+const http = require('http');
 const https = require('https');
 const fs = require('fs');
 const express = require('express');
@@ -22,6 +23,6 @@ const httpsOptions = {
 
 // 启动 HTTPS 服务
 const PORT = 3001;
-https.createServer(httpsOptions, app).listen(PORT, () => {
+http.createServer(app).listen(PORT, () => {
     console.log(`Secure server running on https://localhost:${PORT}`);
 });
