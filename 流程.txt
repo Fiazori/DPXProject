@@ -1,0 +1,136 @@
+
+
+注册：
+
+- frontend/SignupPage.js
+<Button onClick={sendVerificationCode}>'Send Verification Code'
+|
+const sendVerificationCode
+axios.post('https://localhost:3001/api/verification/send-code', {
+                email: formData.email,
+            });
+|
+- backend/verificationRoutes.js
+router.post('/send-code', async (req, res) => {
+    normalize email
+    check email not null, format correct?
+    query: email already in use?
+    send otp code to user
+    query: insert code to db
+});
+|
+return success to frontend
+
+- frontend/SignupPage.js
+<Button onClick={handleSignup}> 'Register'
+|
+const handleSignup 
+axios.post('https://localhost:3001/api/auth/register', formData);
+|
+- backend/authRoutes.js
+router.post('/register', async (req, res) => {
+    check everything not null?
+    query: select optcode from db
+    check code exist && matched?
+});
+|
+return success to frontend
+
+表格更改思路：
+passpackage跟trip连起来，让其成为package和trip的中间表，作为外键(？)传给passenger
+
+passager右边关联passenger_info，将个人信息存入passenger_info，passenger只保留ID,groupID,roomID
+
+pass_room增加是否占有状态("Y", "N")
+package和trip增加是否可用("Y", "N")
+trip增加start和end port
+
+用户：
+
+查询：
+1.出发时间-结束时间
+2.出发地，目的地
+--ask location推荐
+|
+显示port，trip，activity信息
+（显示最低价，有没有房间剩余）
+
+预定：
+trip 确认：
+创建或使用passenger
+确认group
+预定pass_room
+selcect avail
+确保每个room至少一个passenger
+确保group里所有passenger都有room
+锁定用户passroom选择
+（更新invoice totalamount）
+|
+按用户预定package
+保存package选择
+（更新invoice totalamount）
+|
+付款：
+invoice:
+显示invoice信息
+totalamount计算方法：passenger里select groupid，找到对应passenger，找到对应room和package，算总和
+用户可以pay，每次保存付款账单
+
+修改：
+user email
+|
+passinfo email
+|
+passenger
+|
+group
+|
+trip
+
+用户页面：
+trip1, trip2, trip3
+点进trip1
+显示group里所以passenger，passenger对应package，每个passenger对应room，和group预定的room
+
+删除passenger：
+用户可以删除passenger，package会自动被删，room在每次删除后select对应roomID,如果group里所以passenger
+没有这个roomID，设占据为空。
+
+增加passenger：
+直接调用预定流程的创建
+
+增删package：
+对应用户调用增删
+
+增删room:
+用户删除room后，不修改数据库，select出room里有的passenger，要求
+
+passenger信息修改：
+发送验证码，验证后允许修改
+
+员工页面：
+对用户的修改：
+套用用户页面，通过用户email搜索用户，通过tripid检索用户，显示用户全部数据
+
+增改查trip:
+Night, startdate, enddate
+（考虑增加状态显示trip是否可用）
+
+增删改查pass_room:
+增：允许对tripid一个一个加，允许复制其他trip room的分布并清空占据状态
+删：只能删空的room
+改：price
+查：输入tripid，显示所有room。输入roomID，显示信息
+
+增改查Activity & restaurant:
+直接增删改查
+
+package：
+允许增，改price，改是否可用
+
+port:
+增，改，查
+
+trip_port:
+增：查tripid，查port，输入arrival 和departure time，增加。
+删改查，

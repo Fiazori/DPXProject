@@ -1,0 +1,38 @@
+db:
+    host: '127.0.0.1',
+    user: 'root',
+    password: '',
+    database: 'DPX_PROJECT',
+    port: 3307
+
+后端port3001，前端3000
+
+
+backend:
+npm init -y
+npm install express bcrypt jsonwebtoken mysql2 body-parser dotenv cors https
+npm install nodemailer
+npm install cookie-parser
+
+
+frontend:
+npm install @mui/material @emotion/react @emotion/styled axios react-router-dom
+npm install jwt-decode
+
+
+邮件：
+dpxcruise@gmail.com
+hrut hava bpah aqko
+
+
+防止SQL注入：
+使用参数化查询（使用 ? 作为占位符）
+const query = `SELECT * FROM DPX_USERS WHERE username = ?`;
+const [rows] = await db.execute(query, [username]);
+
+
+防XSS：
+前端转义
+React 自动将 user.username 转义为纯文本
+<Typography variant="body1">{`Welcome, ${user.username}`}</Typography>
+
