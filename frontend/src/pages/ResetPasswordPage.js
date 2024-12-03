@@ -48,7 +48,7 @@ const ResetPasswordPage = () => {
         setError('');
         setSuccess('');
         try {
-            await axios.post('http://localhost:3001/api/verification/send-code', {
+            await axios.post(`${process.env.REACT_APP_API_BASE_URL}/verification/send-code`, {
                 email: formData.email,
                 code_type: 'C',
             });
@@ -68,7 +68,7 @@ const ResetPasswordPage = () => {
         setError('');
         setSuccess('');
         try {
-            await axios.post('http://localhost:3001/api/auth/reset-password', {
+            await axios.post(`${process.env.REACT_APP_API_BASE_URL}/auth/reset-password`, {
                 email: formData.email,
                 otpCode: formData.otpCode,
                 newPassword: formData.newPassword,

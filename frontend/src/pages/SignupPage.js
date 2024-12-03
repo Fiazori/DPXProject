@@ -51,7 +51,7 @@ const SignupPage = () => {
         setError('');
         setSuccess('');
         try {
-            await axios.post('http://localhost:3001/api/verification/send-code', {
+            await axios.post(`${process.env.REACT_APP_API_BASE_URL}/verification/send-code`, {
                 email: formData.email,
                 code_type: 'R',
             });
@@ -75,7 +75,7 @@ const SignupPage = () => {
         setError('');
         setSuccess('');
         try {
-            await axios.post('http://localhost:3001/api/auth/register', formData);
+            await axios.post(`${process.env.REACT_APP_API_BASE_URL}/auth/register`, formData);
             setSuccess('Registration successful! Please login.');
             setEmailSent(false); // 重置状态
         } catch (err) {
