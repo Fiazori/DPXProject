@@ -37,9 +37,10 @@ router.get('/available', async (req, res) => {
 
     try {
         const [rooms] = await db.execute(`
-            SELECT r.roomid, r.roomnumber, r.price, l.location_side
+            SELECT r.roomid, r.roomnumber, r.price, l.location_side, s.bed
             FROM dpx_pass_room r
             JOIN dpx_location l ON r.locaid = l.locaid
+            JOIN dpx_stateroom s ON r.sid = s.sid
             WHERE r.occupancy_status = 'N'
               AND r.sid = ?
               AND r.tripid = (SELECT tripid FROM dpx_group WHERE groupid = ?)
@@ -51,6 +52,34 @@ router.get('/available', async (req, res) => {
         res.status(500).json({ message: 'Failed to fetch rooms' });
     }
 });
+
+router.post('/remove', async (req, res) => {
+    const { roomid } = req.body;
+
+    if (!roomid) {
+        return res.status(400).json({ message: 'Room ID is required' });
+    }
+
+    try {
+        // 将所有与该房间关联的乘客的 roomid 设置为 null
+        await db.execute(`
+            UPDATE dpx_passenger
+            SET roomid = NULL
+            WHERE roomid = ?
+        `, [roomid]);
+        await db.execute(`
+            UPDATE dpx_pass_room
+            SET OCCUPANCY_STATUS = 'N'
+            WHERE roomid = ?
+        `, [roomid]);
+        
+        res.status(200).json({ message: 'Room passengers removed successfully' });
+    } catch (err) {
+        console.error('Failed to remove room passengers:', err);
+        res.status(500).json({ message: 'Failed to remove room passengers' });
+    }
+});
+
 
 router.post('/occupy', async (req, res) => {
     const { roomid, status } = req.body;

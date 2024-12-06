@@ -70,7 +70,7 @@ const SelectRoomPage = () => {
                 roomid: room.roomid,
                 status: 'Y',
             });
-            setAddedRooms((prev) => [...prev, room]);
+            setAddedRooms((prev) => [...prev, { ...room, passengers: [] }]);
             setError(''); // 清除错误
             // 重新获取房间数据
             if (selectedRoomType) {
@@ -82,13 +82,37 @@ const SelectRoomPage = () => {
         }
     };
     
-    const handleRemoveRoom = (roomid) => {
-        setAddedRooms((prev) => prev.filter((room) => room.roomid !== roomid));
-        // 释放房间状态
-        axios.post(`${process.env.REACT_APP_API_BASE_URL}/rooms/occupy`, {
-            roomid,
-            status: 'N',
-        });
+    const handleRemoveRoom = async (roomid) => {
+        try {
+            // 解除乘客关联
+            await axios.post(`${process.env.REACT_APP_API_BASE_URL}/rooms/remove`, { roomid });
+            setPassengers((prev) => prev.map((p) => (p.roomid === roomid ? { ...p, roomid: null } : p)));
+            setAddedRooms((prev) => prev.filter((room) => room.roomid !== roomid));
+        } catch (err) {
+            console.error('Failed to remove room:', err);
+        }
+    };
+
+    const handlePassengerDrop = (passenger, roomid) => {
+        const room = addedRooms.find((room) => room.roomid === roomid);
+        if (room.passengers.length >= room.bed) {
+            console.error('Room is full.');
+            return;
+        }
+        if (passenger.roomid) {
+            const previousRoom = addedRooms.find((room) => room.roomid === passenger.roomid);
+            previousRoom.passengers = previousRoom.passengers.filter((p) => p.passinfoid !== passenger.passinfoid);
+        }
+        setPassengers((prev) => prev.map((p) => (p.passinfoid === passenger.passinfoid ? { ...p, roomid } : p)));
+        room.passengers.push(passenger);
+    };
+
+    const handleNext = () => {
+        if (addedRooms.some((room) => room.passengers.length === 0)) {
+            console.error('Each room must have at least one passenger.');
+            return;
+        }
+        navigate(`/next-page?groupid=${groupid}`);
     };
 
     return (
@@ -186,7 +210,7 @@ const SelectRoomPage = () => {
                     display: 'flex',
                     alignItems: 'center',
                     justifyContent: 'space-between',
-                    height: '100%',
+                    height: '90%',
                 }}
             >
                 <CardContent sx={{ flex: '1' }}>
@@ -221,6 +245,7 @@ const SelectRoomPage = () => {
                     </Box>
                 </Modal>
 
+
                 {/* Added Rooms */}
                 <Typography variant="h6" sx={{ marginTop: '30px' }}>
                     Added Rooms:
@@ -228,15 +253,20 @@ const SelectRoomPage = () => {
                 <Grid container spacing={2}>
                     {addedRooms.map((room) => (
                         <Grid item xs={12} sm={6} md={4} key={room.roomid}>
-                            <Card sx={{ border: '1px solid #ddd', borderRadius: '8px', padding: '10px', backgroundColor: '#f0f8ff' }}>
+                            <Card
+                                onDrop={(e) => {
+                                    const passenger = JSON.parse(e.dataTransfer.getData('passenger'));
+                                    handlePassengerDrop(passenger, room.roomid);
+                                }}
+                                onDragOver={(e) => e.preventDefault()}
+                                sx={{ border: '1px solid #ddd', borderRadius: '8px', padding: '10px' }}
+                            >
                                 <CardContent>
-                                    <Typography variant="h6">Room #{room.roomnumber}</Typography>
-                                    <Typography variant="body2">Facing: {room.location_side}</Typography>
-                                    <Typography variant="body2">Price: ${room.price}</Typography>
-                                    <IconButton
-                                        edge="end"
-                                        onClick={() => handleRemoveRoom(room.roomid)}
-                                    >
+                                    <Typography>Room #{room.roomnumber} ({room.passengers.length}/{room.bed})</Typography>
+                                    {room.passengers.map((p) => (
+                                        <Typography key={p.passinfoid}>{p.fname} {p.lname}</Typography>
+                                    ))}
+                                    <IconButton onClick={() => handleRemoveRoom(room.roomid)}>
                                         <DeleteIcon />
                                     </IconButton>
                                 </CardContent>
@@ -244,6 +274,10 @@ const SelectRoomPage = () => {
                         </Grid>
                     ))}
                 </Grid>
+
+                <Button variant="contained" onClick={handleNext} sx={{ marginTop: '20px' }}>
+                    Next
+                </Button>
             </Box>
         </Box>
     );
