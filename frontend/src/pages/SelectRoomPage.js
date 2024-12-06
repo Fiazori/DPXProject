@@ -15,7 +15,7 @@ const SelectRoomPage = () => {
     const [error, setError] = useState('');
     const token = getToken();
     const user = token ? jwtDecode(token) : null;
-
+    const [highlightRooms, setHighlightRooms] = useState({});
     const [passengers, setPassengers] = useState([]);
     const [roomTypes, setRoomTypes] = useState([]);
     const [rooms, setRooms] = useState([]);
@@ -121,6 +121,19 @@ useEffect(() => {
     
 
     const handlePassengerDrop = async (passenger, roomid) => {
+        const room = addedRooms.find((r) => r.roomid === roomid);
+
+        if (room.passengers.length >= room.bed) {
+            // 设置需要高亮的房间
+            setHighlightRooms((prev) => ({ ...prev, [roomid]: true }));
+            setTimeout(() => {
+                setHighlightRooms((prev) => {
+                    const { [roomid]: _, ...rest } = prev; // 清除高亮状态
+                    return rest;
+                });
+            }, 1000); // 3秒后清除高亮
+            return;
+        }
         try {
             await axios.post(`${process.env.REACT_APP_API_BASE_URL}/rooms/assign-passenger`, {
                 roomid,
@@ -310,9 +323,15 @@ const handleNext = () => {
         >
             <Card sx={{ border: '1px solid #ddd', borderRadius: '8px', padding: '10px' }}>
                 <CardContent>
-                    <Typography variant="h6">
-                        Room #{room.roomnumber} ({room.passengers.length}/{room.bed})
-                    </Typography>
+                <Typography
+            variant="h6"
+            sx={{
+                color: highlightRooms[room.roomid] ? 'red' : 'inherit', // 高亮变红
+                transition: 'color 0.3s ease',
+            }}
+        >
+            Room #{room.roomnumber} ({room.passengers.length}/{room.bed})
+        </Typography>
                     <Typography variant="body2" color="textSecondary">
                         Facing: {room.location_side}
                     </Typography>
