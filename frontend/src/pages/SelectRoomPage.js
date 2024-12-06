@@ -6,6 +6,7 @@ import { getToken } from '../util/auth';
 import { jwtDecode } from 'jwt-decode';
 import NavBar from '../components/NavBar';
 import { Delete as DeleteIcon } from '@mui/icons-material';
+import { Add as AddIcon } from '@mui/icons-material';
 
 const SelectRoomPage = () => {
     const navigate = useNavigate();
@@ -22,27 +23,44 @@ const SelectRoomPage = () => {
     const [addedRooms, setAddedRooms] = useState([]); // 已添加的房间
     const [loading, setLoading] = useState(false);
     const [modalOpen, setModalOpen] = useState(false);
+    const [errorMessage, setErrorMessage] = useState('');
 
-    useEffect(() => {
-        if (!groupid) {
-            console.warn('Group ID is missing, skipping fetch.');
-            return;
+const fetchGroupRooms = async () => {
+    try {
+        const response = await axios.get(`${process.env.REACT_APP_API_BASE_URL}/rooms/group-rooms`, {
+            params: { groupid },
+        });
+        setAddedRooms(response.data);
+    } catch (err) {
+        console.error('Failed to fetch group rooms:', err);
+    }
+};
+
+useEffect(() => {
+    if (!groupid) {
+        console.warn('Group ID is missing, skipping fetch.');
+        return;
+    }
+
+    const fetchPassengers = async () => {
+        try {
+            setLoading(true);
+            const response = await axios.get(`${process.env.REACT_APP_API_BASE_URL}/group/passengers?groupid=${groupid}`);
+            setPassengers(response.data);
+        } catch (err) {
+            console.error('Failed to fetch passengers:', err);
+        } finally {
+            setLoading(false);
         }
+    };
 
-        const fetchPassengers = async () => {
-            try {
-                setLoading(true);
-                const response = await axios.get(`${process.env.REACT_APP_API_BASE_URL}/group/passengers?groupid=${groupid}`);
-                setPassengers(response.data);
-            } catch (err) {
-                console.error('Failed to fetch passengers:', err);
-            } finally {
-                setLoading(false);
-            }
-        };
+    const fetchData = async () => {
+        await Promise.all([fetchPassengers(), fetchGroupRooms()]);
+    };
 
-        fetchPassengers();
-    }, [groupid]);
+    fetchData();
+}, [groupid]);
+
 
     const fetchRoomTypes = async () => {
         try {
@@ -71,51 +89,58 @@ const SelectRoomPage = () => {
                 groupid: groupid,
                 status: 'Y',
             });
-            setAddedRooms((prev) => [...prev, { ...room, passengers: [] }]);
-            setError(''); // 清除错误
-            // 重新获取房间数据
-            if (selectedRoomType) {
-                await fetchRooms(selectedRoomType.sid);
-            }
+            setError('');
+            await fetchGroupRooms(); // 重新获取已分配房间的数据
+            await fetchRoomTypes(); // 重新获取房型数据
+            setSelectedRoomType(null); // 清空上一次的选择
+            setRooms([]);
         } catch (err) {
             console.error('Failed to occupy room:', err);
             setError('Failed to add room. It may have been occupied by another user. Please try another room.');
         }
     };
     
+    
     const handleRemoveRoom = async (roomid) => {
         try {
-            // 解除乘客关联
             await axios.post(`${process.env.REACT_APP_API_BASE_URL}/rooms/remove`, { roomid });
-            setPassengers((prev) => prev.map((p) => (p.roomid === roomid ? { ...p, roomid: null } : p)));
-            setAddedRooms((prev) => prev.filter((room) => room.roomid !== roomid));
+            await fetchGroupRooms(); // 重新获取房间和乘客数据
         } catch (err) {
             console.error('Failed to remove room:', err);
         }
     };
-
-    const handlePassengerDrop = (passenger, roomid) => {
-        const room = addedRooms.find((room) => room.roomid === roomid);
-        if (room.passengers.length >= room.bed) {
-            console.error('Room is full.');
-            return;
+    
+    const handleRemovePassenger = async (passengerid) => {
+        try {
+            await axios.post(`${process.env.REACT_APP_API_BASE_URL}/rooms/remove-passenger`, { passengerid });
+            await fetchGroupRooms(); // 重新获取房间和乘客数据
+        } catch (err) {
+            console.error('Failed to remove passenger from room:', err);
         }
-        if (passenger.roomid) {
-            const previousRoom = addedRooms.find((room) => room.roomid === passenger.roomid);
-            previousRoom.passengers = previousRoom.passengers.filter((p) => p.passinfoid !== passenger.passinfoid);
-        }
-        setPassengers((prev) => prev.map((p) => (p.passinfoid === passenger.passinfoid ? { ...p, roomid } : p)));
-        room.passengers.push(passenger);
     };
+    
 
-    const handleNext = () => {
-        if (addedRooms.some((room) => room.passengers.length === 0)) {
-            console.error('Each room must have at least one passenger.');
-            return;
+    const handlePassengerDrop = async (passenger, roomid) => {
+        try {
+            await axios.post(`${process.env.REACT_APP_API_BASE_URL}/rooms/assign-passenger`, {
+                roomid,
+                passengerid: passenger.passengerid, // 这里使用 passengerid
+            });
+            await fetchGroupRooms(); // 重新获取房间和乘客数据
+        } catch (err) {
+            console.error('Failed to assign passenger to room:', err);
         }
-        navigate(`/next-page?groupid=${groupid}`);
     };
-
+    
+    
+const handleNext = () => {
+    if (addedRooms.some((room) => room.passengers.length === 0)) {
+        setErrorMessage('Each room must have at least one passenger.');
+        return;
+    }
+    setErrorMessage(''); // 清除错误
+    navigate(`/next-page?groupid=${groupid}`);
+};
     return (
         <Box>
             <NavBar />
@@ -129,38 +154,59 @@ const SelectRoomPage = () => {
                     Group Passengers:
                 </Typography>
                 <Grid container spacing={2}>
-                    {passengers.map((passenger) => (
-                        <Grid item xs={12} sm={6} md={4} key={passenger.passinfoid}>
-                            <Card sx={{ border: '1px solid #ddd', borderRadius: '8px', padding: '10px', backgroundColor: '#f9f9f9' }}>
-                                <CardContent>
-                                    <Typography variant="h6">
-                                        {passenger.fname} {passenger.lname}
-                                    </Typography>
-                                    <Typography variant="body2" color="textSecondary">
-                                        {passenger.email}
-                                    </Typography>
-                                </CardContent>
-                            </Card>
-                        </Grid>
-                    ))}
-                </Grid>
+    {passengers.map((passenger) => (
+        <Grid
+            item
+            xs={12}
+            sm={6}
+            md={4}
+            key={passenger.passinfoid}
+            draggable
+            onDragStart={(e) => e.dataTransfer.setData('passenger', JSON.stringify(passenger))}
+        >
+            <Card sx={{ border: '1px solid #ddd', borderRadius: '8px', padding: '10px', backgroundColor: '#f9f9f9' }}>
+                <CardContent>
+                    <Typography variant="h6">
+                        {passenger.fname} {passenger.lname}
+                    </Typography>
+                    <Typography variant="body2" color="textSecondary">
+                        {passenger.email}
+                    </Typography>
+                </CardContent>
+            </Card>
+        </Grid>
+    ))}
+</Grid>
 
-                {/* Add Room Button */}
-                <Box sx={{ textAlign: 'center', marginTop: '30px' }}>
-                    <Button
-                        variant="contained"
-                        color="primary"
-                        onClick={async () => {
-                            setModalOpen(true);
-                            await fetchRoomTypes(); // 重新获取房型数据
-                            setSelectedRoomType(null); // 清空上一次的选择
-                            setRooms([]); // 清空上一次的房间数据
-                        }}
-                    >
-                        Add Room
-                    </Button>
 
-                </Box>
+                
+<Box sx={{ display: 'flex', alignItems: 'center', marginTop: '50px', marginBottom: '30px'}}>
+    <Typography variant="h6" sx={{ marginRight: '10px' }}>
+        Rooms:
+    </Typography>
+    <IconButton
+        onClick={() => {
+            setModalOpen(true);
+            fetchRoomTypes();
+            setSelectedRoomType(null);
+            setRooms([]);
+        }}
+        sx={{
+            backgroundColor: '#999999',
+            color: 'white',
+            padding: '12px',
+            borderRadius: '30%', // 圆形按钮
+            boxShadow: '0px 4px 6px rgba(0, 0, 0, 0.1)',
+            '&:hover': {
+                backgroundColor: '#00bfff',
+            },
+        }}
+    >
+        <AddIcon />
+    </IconButton>
+</Box>
+
+
 
                 {/* Modal for Room Selection */}
                 <Modal open={modalOpen} onClose={() => setModalOpen(false)}>
@@ -247,38 +293,92 @@ const SelectRoomPage = () => {
                 </Modal>
 
 
-                {/* Added Rooms */}
-                <Typography variant="h6" sx={{ marginTop: '30px' }}>
-                    Added Rooms:
-                </Typography>
-                <Grid container spacing={2}>
-                    {addedRooms.map((room) => (
-                        <Grid item xs={12} sm={6} md={4} key={room.roomid}>
-                            <Card
-                                onDrop={(e) => {
-                                    const passenger = JSON.parse(e.dataTransfer.getData('passenger'));
-                                    handlePassengerDrop(passenger, room.roomid);
-                                }}
-                                onDragOver={(e) => e.preventDefault()}
-                                sx={{ border: '1px solid #ddd', borderRadius: '8px', padding: '10px' }}
-                            >
-                                <CardContent>
-                                    <Typography>Room #{room.roomnumber} ({room.passengers.length}/{room.bed})</Typography>
-                                    {room.passengers.map((p) => (
-                                        <Typography key={p.passinfoid}>{p.fname} {p.lname}</Typography>
-                                    ))}
-                                    <IconButton onClick={() => handleRemoveRoom(room.roomid)}>
-                                        <DeleteIcon />
-                                    </IconButton>
-                                </CardContent>
-                            </Card>
-                        </Grid>
-                    ))}
-                </Grid>
 
-                <Button variant="contained" onClick={handleNext} sx={{ marginTop: '20px' }}>
-                    Next
-                </Button>
+                <Grid container spacing={2} >
+    {addedRooms.map((room) => (
+        <Grid
+            item
+            xs={12}
+            sm={6}
+            md={4}
+            key={room.roomid}
+            onDrop={(e) => {
+                const passenger = JSON.parse(e.dataTransfer.getData('passenger'));
+                handlePassengerDrop(passenger, room.roomid);
+            }}
+            onDragOver={(e) => e.preventDefault()}
+        >
+            <Card sx={{ border: '1px solid #ddd', borderRadius: '8px', padding: '10px' }}>
+                <CardContent>
+                    <Typography variant="h6">
+                        Room #{room.roomnumber} ({room.passengers.length}/{room.bed})
+                    </Typography>
+                    <Typography variant="body2" color="textSecondary">
+                        Facing: {room.location_side}
+                    </Typography>
+                    <Typography variant="body2" color="textSecondary">
+                        Type: {room.type}
+                    </Typography>
+                    <Typography variant="body2" color="textSecondary">
+                        Price: ${room.price}
+                    </Typography>
+
+                    {/* 显示乘客列表 */}
+                    <Typography variant="body1" sx={{ marginTop: '10px' }}>
+                        Passengers:
+                    </Typography>
+                    <ul>
+    {room.passengers.map((p) => (
+        <li key={p.passengerid}>
+            {p.fname} {p.lname}
+            <IconButton onClick={() => handleRemovePassenger(p.passengerid)}>
+                <DeleteIcon />
+            </IconButton>
+        </li>
+    ))}
+</ul>
+
+<Button
+    onClick={() => handleRemoveRoom(room.roomid)}
+    sx={{
+        display: 'block', // 使按钮以块级元素居中
+        margin: '0 auto', // 自动设置左右外边距居中
+        marginTop: '20px', // 增加顶部间距
+    }}
+>
+    Delete Room
+</Button>
+
+
+                </CardContent>
+            </Card>
+        </Grid>
+    ))}
+</Grid>
+
+<Box sx={{ margin: '20px 0', textAlign: 'center' }}>
+    {errorMessage && (
+        <Typography color="error" variant="body1">
+            {errorMessage}
+        </Typography>
+    )}
+</Box>
+
+<Box sx={{ textAlign: 'center', marginTop: '30px' }}>
+    <Button
+        variant="contained"
+        onClick={handleNext}
+        sx={{
+            padding: '16px 32px',
+            fontSize: '18px',
+            marginTop: '20px',
+        }}
+    >
+        Next
+    </Button>
+</Box>
+
+
             </Box>
         </Box>
     );

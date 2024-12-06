@@ -102,4 +102,87 @@ router.post('/occupy', async (req, res) => {
     }
 });
 
+// 获取组的所有房间及乘客信息
+router.get('/group-rooms', async (req, res) => {
+    const { groupid } = req.query;
+
+    if (!groupid) {
+        return res.status(400).json({ message: 'Group ID is required' });
+    }
+
+    try {
+        const [rooms] = await db.execute(`
+            SELECT r.roomid, r.roomnumber, r.price, l.location_side, s.bed, s.type
+            FROM dpx_pass_room r
+            JOIN dpx_location l ON r.locaid = l.locaid
+            JOIN dpx_stateroom s ON r.sid = s.sid
+            WHERE r.groupid = ?
+        `, [groupid]);
+
+        const [passengers] = await db.execute(`
+            SELECT p.passengerid, p.roomid, pi.fname, pi.lname
+            FROM dpx_passenger p
+            JOIN dpx_passenger_info pi ON p.passinfoid = pi.passinfoid
+            WHERE p.groupid = ?
+        `, [groupid]);
+
+        const roomData = rooms.map((room) => ({
+            ...room,
+            passengers: passengers.filter((p) => p.roomid === room.roomid),
+        }));
+
+        res.json(roomData);
+    } catch (err) {
+        console.error('Failed to fetch group rooms:', err);
+        res.status(500).json({ message: 'Failed to fetch group rooms' });
+    }
+});
+
+
+router.post('/assign-passenger', async (req, res) => {
+    const { roomid, passengerid } = req.body; // 接收 passengerid 而不是 passinfoid
+
+    if (!roomid || !passengerid) {
+        return res.status(400).json({ message: 'Room ID and Passenger ID are required' });
+    }
+
+    try {
+        // 更新 dpx_passenger 表中的 roomid
+        await db.execute(`
+            UPDATE dpx_passenger
+            SET roomid = ?
+            WHERE passengerid = ?
+        `, [roomid, passengerid]); // 使用 passengerid 作为条件
+
+        res.status(200).json({ message: 'Passenger assigned to room successfully' });
+    } catch (err) {
+        console.error('Failed to assign passenger to room:', err);
+        res.status(500).json({ message: 'Failed to assign passenger to room' });
+    }
+});
+
+router.post('/remove-passenger', async (req, res) => {
+    const { passengerid } = req.body;
+
+    if (!passengerid) {
+        return res.status(400).json({ message: 'Passenger ID is required' });
+    }
+
+    try {
+        // 更新 dpx_passenger 表，将 roomid 设置为 NULL
+        await db.execute(`
+            UPDATE dpx_passenger
+            SET roomid = NULL
+            WHERE passengerid = ?
+        `, [passengerid]);
+
+        res.status(200).json({ message: 'Passenger removed from room successfully' });
+    } catch (err) {
+        console.error('Failed to remove passenger from room:', err);
+        res.status(500).json({ message: 'Failed to remove passenger from room' });
+    }
+});
+
+
+
 module.exports = router;
