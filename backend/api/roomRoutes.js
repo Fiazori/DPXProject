@@ -69,7 +69,7 @@ router.post('/remove', async (req, res) => {
         `, [roomid]);
         await db.execute(`
             UPDATE dpx_pass_room
-            SET OCCUPANCY_STATUS = 'N'
+            SET OCCUPANCY_STATUS = 'N', groupid = NULL
             WHERE roomid = ?
         `, [roomid]);
         
@@ -82,7 +82,7 @@ router.post('/remove', async (req, res) => {
 
 
 router.post('/occupy', async (req, res) => {
-    const { roomid, status } = req.body;
+    const { roomid, groupid, status } = req.body;
 
     if (!roomid || !status) {
         return res.status(400).json({ message: 'Room ID and Status are required' });
@@ -91,9 +91,9 @@ router.post('/occupy', async (req, res) => {
     try {
         await db.execute(`
             UPDATE dpx_pass_room
-            SET occupancy_status = ?
+            SET occupancy_status = ?, groupid = ?
             WHERE roomid = ?
-        `, [status, roomid]);
+        `, [status, groupid, roomid]);
 
         res.status(200).json({ message: 'Room status updated successfully' });
     } catch (err) {

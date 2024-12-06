@@ -68,6 +68,7 @@ const SelectRoomPage = () => {
         try {
             await axios.post(`${process.env.REACT_APP_API_BASE_URL}/rooms/occupy`, {
                 roomid: room.roomid,
+                groupid: groupid,
                 status: 'Y',
             });
             setAddedRooms((prev) => [...prev, { ...room, passengers: [] }]);
