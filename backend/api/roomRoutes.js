@@ -12,7 +12,7 @@ router.get('/types', async (req, res) => {
 
     try {
         const [roomTypes] = await db.execute(`
-            SELECT r.sid, s.type, COUNT(r.roomid) AS emptyRooms, MIN(r.price) AS minPrice
+            SELECT r.sid, s.type, s.bed, COUNT(r.roomid) AS emptyRooms, MIN(r.price) AS minPrice
             FROM dpx_pass_room r
             JOIN dpx_stateroom s ON r.sid = s.sid
             WHERE r.occupancy_status = 'N'

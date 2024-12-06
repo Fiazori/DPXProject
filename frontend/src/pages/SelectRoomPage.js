@@ -164,7 +164,7 @@ const SelectRoomPage = () => {
                                 >
                                     <ListItemText
                                         primary={`${roomType.type} - ${roomType.emptyRooms} Available`}
-                                        secondary={`Starting at $${roomType.minPrice}`}
+                                        secondary={`${roomType.bed} beds - Starting at $${roomType.minPrice}`}
                                     />
                                 </ListItem>
                             ))}
