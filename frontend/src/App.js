@@ -7,6 +7,8 @@ import SettingPage from './pages/SettingPage';
 import FindTripPage from './pages/FindTripPage';
 import ResetPasswordPage from './pages/ResetPasswordPage';
 import PassengerSelectionPage from './pages/PassengerSelectionPage';
+import SelectRoomPage from './pages/SelectRoomPage';
+
 function App() {
     return (
         <Router>
@@ -18,6 +20,8 @@ function App() {
                 <Route path="/setting" element={<SettingPage />} />
                 <Route path="/findtrip" element={<FindTripPage />} />
                 <Route path="/passenger-selection" element={<PassengerSelectionPage />} />
+                <Route path="/select-room" element={<SelectRoomPage />} />
+
             </Routes>
         </Router>
     );

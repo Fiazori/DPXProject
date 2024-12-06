@@ -44,7 +44,6 @@ const PassengerSelectionPage = () => {
         }
 
         const fetchSavedPassengers = async () => {
-            if (!user.user_id) return;
             try {
                 const response = await axios.get(`${process.env.REACT_APP_API_BASE_URL}/passenger/saved?userid=${user.user_id}`);
                 setSavedPassengers(response.data);
@@ -55,7 +54,7 @@ const PassengerSelectionPage = () => {
         fetchSavedPassengers();
     }, [user]);
 
-    // Add new passenger validation
+    // Validate new passenger form
     const validateForm = () => {
         const newErrors = {};
         Object.keys(newPassenger).forEach((key) => {
@@ -113,7 +112,7 @@ const PassengerSelectionPage = () => {
         }
     };
 
-    // Select passenger for group
+    // Select passengers
     const toggleSelectPassenger = (passinfoid) => {
         setSelectedPassengers((prev) =>
             prev.includes(passinfoid)
@@ -122,28 +121,24 @@ const PassengerSelectionPage = () => {
         );
     };
 
-    // Proceed to next page
+    // Proceed to Select Room Page
     const handleSelectRoom = async () => {
         try {
             // Create group
-            const groupResponse = await axios.post(`${process.env.REACT_APP_API_BASE_URL}/passenger/group/create`, {
+            const groupResponse = await axios.post(`${process.env.REACT_APP_API_BASE_URL}/group/create`, {
                 tripid,
                 group_size: selectedPassengers.length,
             });
             const groupid = groupResponse.data.groupid;
 
-            // Create passengers in group
-            await Promise.all(
-                selectedPassengers.map((passinfoid) =>
-                    axios.post(`${process.env.REACT_APP_API_BASE_URL}/passenger/group`, {
-                        groupid,
-                        passinfoid,
-                        roomid: null,
-                    })
-                )
-            );
+            // Navigate to the next page immediately
+            navigate(`/select-room?groupid=${groupid}&tripid=${tripid}`);
 
-            navigate(`/book/room?tripid=${tripid}&groupid=${groupid}`);
+            // Assign passengers to the group asynchronously
+            await axios.post(`${process.env.REACT_APP_API_BASE_URL}/group/assign`, {
+                groupid,
+                passengers: selectedPassengers.map((passinfoid) => ({ passinfoid })),
+            });
         } catch (err) {
             console.error('Failed to proceed to select room:', err);
         }
@@ -159,23 +154,23 @@ const PassengerSelectionPage = () => {
                 <Divider sx={{ my: 3 }} />
                 <List>
                     <ListItem
-                            button
-                            onClick={() => setOpenModal(true)}
-                            sx={{
-                                border: '1px solid #ddd',
-                                borderRadius: '8px',
-                                marginBottom: '8px',
-                                backgroundColor: '#f9f9f9',
-                            }}
-                        >
-                            <ListItemText
-                                primary={
-                                    <Typography variant="h6" color="primary">
-                                        + Add New Passenger
-                                    </Typography>
-                                }
-                            />
-                        </ListItem>
+                        button
+                        onClick={() => setOpenModal(true)}
+                        sx={{
+                            border: '1px solid #ddd',
+                            borderRadius: '8px',
+                            marginBottom: '8px',
+                            backgroundColor: '#f9f9f9',
+                        }}
+                    >
+                        <ListItemText
+                            primary={
+                                <Typography variant="h6" color="primary">
+                                    + Add New Passenger
+                                </Typography>
+                            }
+                        />
+                    </ListItem>
                     {savedPassengers.map((passenger) => (
                         <ListItem
                             key={passenger.passinfoid}

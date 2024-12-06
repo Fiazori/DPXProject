@@ -8,6 +8,11 @@ const authRoutes = require('./api/authRoutes');
 const verificationRoutes = require('./api/verificationRoutes');
 const tripRoutes = require('./api/tripRoutes');
 const passengerRoutes = require('./api/passengerRoute');
+const groupRoutes = require('./api/groupRoutes');
+const roomRoutes = require('./api/roomRoutes');
+
+
+
 const app = express();
 
 app.use(cors());
@@ -18,6 +23,8 @@ app.use('/api/auth', authRoutes);
 app.use('/api/verification', verificationRoutes);
 app.use('/api/trips', tripRoutes);
 app.use('/api/passenger', passengerRoutes);
+app.use('/api/group', groupRoutes);
+app.use('/api/rooms', roomRoutes);
 
 // 加载证书
 const httpsOptions = {

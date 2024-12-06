@@ -86,48 +86,4 @@ router.post('/save', async (req, res) => {
     }
 });
 
-// 创建 dpx_group 行
-router.post('/group/create', async (req, res) => {
-    const { tripid, group_size } = req.body;
-
-    if (!tripid || !group_size) {
-        return res.status(400).json({ message: 'Trip ID and Group Size are required' });
-    }
-
-    try {
-        const [result] = await db.execute(`
-            INSERT INTO dpx_group (tripid, group_size)
-            VALUES (?, ?)
-        `, [tripid, group_size]);
-
-        const groupid = result.insertId; // 获取新创建的 groupid
-        res.status(201).json({ groupid });
-    } catch (err) {
-        console.error('Failed to create group:', err);
-        res.status(500).json({ message: 'Failed to create group' });
-    }
-});
-
-// 创建 dpx_passenger 行
-router.post('/group', async (req, res) => {
-    const { groupid, passinfoid, roomid } = req.body;
-
-    if (!groupid || !passinfoid) {
-        return res.status(400).json({ message: 'Group ID and Passenger Info ID are required' });
-    }
-
-    try {
-        await db.execute(`
-            INSERT INTO dpx_passenger (groupid, roomid, passinfoid)
-            VALUES (?, ?, ?)
-        `, [groupid, roomid, passinfoid]);
-
-        res.status(201).json({ message: 'Passenger added to group successfully' });
-    } catch (err) {
-        console.error('Failed to add passenger to group:', err);
-        res.status(500).json({ message: 'Failed to add passenger to group' });
-    }
-});
-
-
 module.exports = router;
