@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { Box, Button, TextField, Typography, Grid, Card, CardContent, Divider } from '@mui/material';
 import NavBar from '../components/NavBar';
 import axios from 'axios';
+import { useNavigate } from 'react-router-dom';
 
 const FindTripPage = () => {
     const [startPort, setStartPort] = useState('');
@@ -11,6 +12,7 @@ const FindTripPage = () => {
     const [night, setNight] = useState('');
     const [trips, setTrips] = useState([]);
     const [error, setError] = useState('');
+    const navigate = useNavigate();
 
     // 查询行程
     const handleSearch = async () => {
@@ -140,7 +142,8 @@ const FindTripPage = () => {
     {trips.map((trip) => {
         const portsArray = trip.ports ? trip.ports.split(', ') : []; // 将逗号分隔的字符串转换为数组
         return (
-            <Grid item xs={12} sm={6} key={trip.tripid}>
+            <Grid item xs={12} sm={6} key={trip.tripid}
+            onClick={() => navigate(`/passenger-selection?tripid=${trip.tripid}`)}>
                 <Card sx={{ display: 'flex', flexDirection: 'row', p: 2, 
                             boxShadow: '0px 4px 10px rgba(0, 0, 0, 0.3)', borderRadius: '12px',
                             }}>

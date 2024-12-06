@@ -7,6 +7,7 @@ const cors = require('cors');
 const authRoutes = require('./api/authRoutes');
 const verificationRoutes = require('./api/verificationRoutes');
 const tripRoutes = require('./api/tripRoutes');
+const passengerRoutes = require('./api/passengerRoute');
 const app = express();
 
 app.use(cors());
@@ -16,6 +17,7 @@ app.use(bodyParser.json());
 app.use('/api/auth', authRoutes);
 app.use('/api/verification', verificationRoutes);
 app.use('/api/trips', tripRoutes);
+app.use('/api/passenger', passengerRoutes);
 
 // 加载证书
 const httpsOptions = {
