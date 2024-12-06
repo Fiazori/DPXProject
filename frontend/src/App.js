@@ -4,6 +4,7 @@ import LoginPage from './pages/LoginPage';
 import SignupPage from './pages/SignupPage';
 import HomePage from './pages/HomePage';
 import SettingPage from './pages/SettingPage';
+import FindTripPage from './pages/FindTripPage';
 import ResetPasswordPage from './pages/ResetPasswordPage';
 function App() {
     return (
@@ -14,6 +15,7 @@ function App() {
                 <Route path="/signup" element={<SignupPage />} />
                 <Route path="/resetpassword" element={<ResetPasswordPage />} />
                 <Route path="/setting" element={<SettingPage />} />
+                <Route path="/findtrip" element={<FindTripPage />} />
             </Routes>
         </Router>
     );

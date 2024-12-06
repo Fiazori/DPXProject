@@ -12,6 +12,8 @@ CREATE TABLE DPX_USERS (
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );
 
+DELETE FROM DPX_USERS WHERE email = 'dinghengyan@gmail.com';
+
 -- 验证码管理
 CREATE TABLE DPX_OTP_CODE (
     id INT AUTO_INCREMENT PRIMARY KEY,
@@ -30,3 +32,34 @@ ON SCHEDULE EVERY 1 MINUTE
 DO
     DELETE FROM DPX_OTP_CODE
     WHERE expires_at < NOW();
+
+select * from dpx_users;
+select * from dpx_otp_code;
+
+SELECT * FROM DPX_USERS WHERE email = 'dy';
+
+
+-- test
+-- dpx_trip
+CREATE TABLE dpx_trip (
+    tripid     INT AUTO_INCREMENT PRIMARY KEY,
+    night      INT NOT NULL COMMENT 'The total number of nights',
+    startdate  DATE NOT NULL COMMENT 'The start date of the trip',
+    enddate    DATE NOT NULL COMMENT 'The end date of the trip',
+    is_active  CHAR(1) NOT NULL COMMENT 'Indicates if the trip is currently active and bookable ("Y" for Yes, "N" for No)',
+    start_port INT NOT NULL,
+    end_port   INT NOT NULL
+--     FOREIGN KEY (start_port) REFERENCES dpx_port(portid),
+--     FOREIGN KEY (end_port) REFERENCES dpx_port(portid)
+);
+
+-- 插入测试数据到 dpx_trip 表
+INSERT INTO dpx_trip (night, startdate, enddate, is_active, start_port, end_port)
+VALUES 
+(7, '2024-12-10', '2024-12-17', 'Y', 1, 2), -- Example trip 1
+(5, '2024-12-15', '2024-12-20', 'Y', 2, 3), -- Example trip 2
+(10, '2024-12-01', '2024-12-11', 'N', 1, 4), -- Example trip 3 (inactive)
+(3, '2024-12-05', '2024-12-08', 'Y', 3, 1), -- Example trip 4
+(14, '2024-12-20', '2025-01-03', 'Y', 4, 2); -- Example trip 5
+
+select * from dpx_trip;

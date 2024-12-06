@@ -33,7 +33,7 @@ const NavBar = () => {
     // 导航项
     const navItems = [
         { label: 'Home', path: '/' },
-        { label: 'sadsa', path: '/2' },
+        { label: 'Find Trip', path: '/findtrip' },
         { label: '3saffsafsa', path: '/3' },
         { label: 'dgsdgsdtgyet', path: '/4' },
         { label: 'rwrwqasr', path: '/5' },
