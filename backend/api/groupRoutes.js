@@ -26,6 +26,30 @@ router.get('/passengers', async (req, res) => {
     }
 });
 
+router.post('/delete-group', async (req, res) => {
+    const { groupid } = req.body;
+
+    if (!groupid) {
+        return res.status(400).json({ message: 'Group ID is required' });
+    }
+
+    try {
+        // Call the stored procedure
+        await db.execute(`CALL DeleteGroup(?)`, [groupid]);
+
+        res.status(200).json({ message: 'Group deleted successfully' });
+    } catch (err) {
+        console.error('Failed to delete group:', err);
+
+        // Handle specific error for SIGNAL raised in the procedure
+        if (err.sqlState === '45000') {
+            res.status(400).json({ message: err.message });
+        } else {
+            res.status(500).json({ message: 'Failed to delete group' });
+        }
+    }
+});
+
 // Create group
 router.post('/create', async (req, res) => {
     const { tripid, group_size } = req.body;

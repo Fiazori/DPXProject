@@ -35,9 +35,7 @@ const NavBar = () => {
         { label: 'Home', path: '/' },
         { label: 'Find Trip', path: '/findtrip' },
         { label: 'Manage Trip', path: '/manage-trip' },
-        { label: 'dgsdgsdtgyet', path: '/4' },
-        { label: 'rwrwqasr', path: '/5' },
-        { label: 'wrwrwq', path: '/6' },
+        { label: 'About', path: '/4' },
     ];
 
     return (
