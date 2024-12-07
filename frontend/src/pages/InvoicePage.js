@@ -4,6 +4,7 @@ import { Box, Typography, Button, TextField, Select, MenuItem, Table, TableBody,
 import { Dialog, DialogTitle, DialogContent, DialogActions } from '@mui/material';
 import axios from 'axios';
 import NavBar from '../components/NavBar';
+import Sidebar from '../components/Sidebar';
 
 const InvoicePage = () => {
     const [searchParams] = useSearchParams();
@@ -28,85 +29,106 @@ const InvoicePage = () => {
 
     const [openPaymentDialog, setOpenPaymentDialog] = useState(false);
     const [openHistoryDialog, setOpenHistoryDialog] = useState(false);
-    // Fetch invoice details
-    const fetchInvoiceDetails = async () => {
-        const { data } = await axios.get(`${process.env.REACT_APP_API_BASE_URL}/invoice/details`, {
-            params: { groupid, tripid },
-        });
-        const sortedPackageDetails = data.packageDetails.sort((a, b) =>
-            a.fname.localeCompare(b.fname)
-        );
+    useEffect(() => {
+        const initializeInvoice = async () => {
+            try {
+                // 先创建或更新发票
+                const { data } = await axios.post(`${process.env.REACT_APP_API_BASE_URL}/invoice/create-or-update`, {
+                    groupid,
+                    tripid,
+                });
     
-        setRoomDetails(data.roomDetails);
-        setPackageDetails(data.packageDetails);
-        setTotalRoomCost(parseFloat(data.totalRoomCost).toFixed(2));
-        setTotalPackageCost(parseFloat(data.totalPackageCost).toFixed(2));
-        setTotalAmount(parseFloat(data.totalAmount).toFixed(2));
-        setTotalPaid(parseFloat(data.totalPaid).toFixed(2));
-        setRemainingAmount(parseFloat(data.totalAmount - data.totalPaid).toFixed(2));
-        setDueDate(data.dueDate);
+                setInvoiceId(data.inid); // 设置发票 ID
+                setTotalAmount(parseFloat(data.totalAmount).toFixed(2)); // 设置总金额
+    
+                // 获取发票详情
+                await fetchInvoiceDetails();
+            } catch (err) {
+                console.error('Failed to initialize invoice:', err);
+            }
+        };
+    
+        initializeInvoice();
+    }, [groupid, tripid]);
+    
+    // 获取发票详情
+    const fetchInvoiceDetails = async () => {
+        try {
+            const { data } = await axios.get(`${process.env.REACT_APP_API_BASE_URL}/invoice/details`, {
+                params: { groupid, tripid },
+            });
+    
+            const sortedPackageDetails = data.packageDetails.sort((a, b) =>
+                a.fname.localeCompare(b.fname)
+            );
+    
+            setRoomDetails(data.roomDetails);
+            setPackageDetails(sortedPackageDetails);
+            setTotalRoomCost(parseFloat(data.totalRoomCost).toFixed(2));
+            setTotalPackageCost(parseFloat(data.totalPackageCost).toFixed(2));
+            setTotalAmount(parseFloat(data.totalAmount).toFixed(2));
+            setTotalPaid(parseFloat(data.totalPaid).toFixed(2));
+            setRemainingAmount(parseFloat(data.totalAmount - data.totalPaid).toFixed(2));
+            setDueDate(data.dueDate);
+        } catch (err) {
+            console.error('Failed to fetch invoice details:', err);
+        }
     };
     
-    useEffect(() => {
-
-
-        const createOrUpdateInvoice = async () => {
-            const { data } = await axios.post(`${process.env.REACT_APP_API_BASE_URL}/invoice/create-or-update`, {
-                groupid,
-                tripid,
-            });
-
-            setTotalAmount(parseFloat(data.totalAmount).toFixed(2));
-            setInvoiceId(data.inid);
-        };
-
-        fetchInvoiceDetails();
-        createOrUpdateInvoice();
-    }, [groupid, tripid]);
-
-        // Fetch payment history
-        const fetchPaymentHistory = async () => {
-            if (!invoiceId) return;
+    // 获取付款历史
+    const fetchPaymentHistory = async () => {
+        if (!invoiceId) return;
     
+        try {
             const { data } = await axios.get(`${process.env.REACT_APP_API_BASE_URL}/invoice/payment-history`, {
                 params: { inid: invoiceId },
             });
     
             setPaymentHistory(data);
-        };
+        } catch (err) {
+            console.error('Failed to fetch payment history:', err);
+        }
+    };
     
-        useEffect(() => {
+    useEffect(() => {
+        if (invoiceId) {
             fetchPaymentHistory();
-        }, [invoiceId]);
+        }
+    }, [invoiceId]);
     
-        // Handle payment
-        const handlePayment = async () => {
-            if (!payAmount || parseFloat(payAmount) <= 0) {
-                setPaymentMessage('Please enter a valid payment amount.');
-                setMessageType('error');
-                return;
-            }
+    // 处理付款
+    const handlePayment = async () => {
+        if (!payAmount || parseFloat(payAmount) <= 0) {
+            setPaymentMessage('Please enter a valid payment amount.');
+            setMessageType('error');
+            return;
+        }
     
-            try {
-                await axios.post(`${process.env.REACT_APP_API_BASE_URL}/invoice/payment`, {
-                    inid: invoiceId,
-                    payamount: parseFloat(payAmount),
-                    paymethod: payMethod,
-                });
-                setPaymentMessage('Payment recorded successfully!');
-                setMessageType('success');
-                setPayAmount('');
-                fetchPaymentHistory();
-                fetchInvoiceDetails();
-            } catch (err) {
-                setPaymentMessage(err.response?.data?.message || 'Failed to record payment.');
-                setMessageType('error');
-            }
-        };
+        try {
+            await axios.post(`${process.env.REACT_APP_API_BASE_URL}/invoice/payment`, {
+                inid: invoiceId,
+                payamount: parseFloat(payAmount),
+                paymethod: payMethod,
+            });
+    
+            setPaymentMessage('Payment recorded successfully!');
+            setMessageType('success');
+            setPayAmount('');
+    
+            // 更新付款历史和发票详情
+            fetchPaymentHistory();
+            fetchInvoiceDetails();
+        } catch (err) {
+            setPaymentMessage(err.response?.data?.message || 'Failed to record payment.');
+            setMessageType('error');
+        }
+    };
+    
 
     return (
         <Box>
         <NavBar />
+        <Sidebar />
         <Box sx={{ maxWidth: '1200px', margin: 'auto', marginTop: '120px' }}>
             <Typography variant="h4" textAlign="center">
                 Invoice

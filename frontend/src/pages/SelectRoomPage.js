@@ -7,6 +7,7 @@ import { jwtDecode } from 'jwt-decode';
 import NavBar from '../components/NavBar';
 import { Delete as DeleteIcon } from '@mui/icons-material';
 import { Add as AddIcon } from '@mui/icons-material';
+import Sidebar from '../components/Sidebar';
 
 const SelectRoomPage = () => {
     const navigate = useNavigate();
@@ -158,6 +159,7 @@ const handleNext = () => {
     return (
         <Box>
             <NavBar />
+            <Sidebar />
             <Box sx={{ maxWidth: '1200px', margin: 'auto', marginTop: '130px', padding: '20px' }}>
                 <Typography variant="h4" textAlign="center" gutterBottom>
                     Select Rooms for Your Group

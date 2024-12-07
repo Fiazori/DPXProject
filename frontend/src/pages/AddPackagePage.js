@@ -4,6 +4,7 @@ import { Box, Typography, Card, Button, Grid, Chip } from '@mui/material';
 import axios from 'axios';
 import NavBar from '../components/NavBar';
 import { useNavigate } from 'react-router-dom';
+import Sidebar from '../components/Sidebar';
 
 const PackagePage = () => {
     const [searchParams] = useSearchParams();
@@ -69,6 +70,7 @@ const PackagePage = () => {
     return (
         <Box>
         <NavBar />
+        <Sidebar />
         <Box sx={{ maxWidth: '1800px', margin: 'auto', marginTop: '120px' }}>
             <Typography variant="h4" textAlign="center">
                 Select Packages for Your Group
