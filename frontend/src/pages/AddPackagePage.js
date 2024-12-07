@@ -119,7 +119,7 @@ const PackagePage = () => {
                                                     {pkg.packtype}
                                                 </Typography>
                                                 <Typography variant="body2" color="textSecondary">
-                                                    ${pkg.packcost} ({pkg.pricing_type === 'per_day' ? 'Per Day' : 'Entire Trip'})
+                                                    ${pkg.packcost} ({pkg.pricing_type})
                                                 </Typography>
                                                 <Button
     variant="outlined"
