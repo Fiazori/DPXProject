@@ -9,7 +9,7 @@ import ResetPasswordPage from './pages/ResetPasswordPage';
 import PassengerSelectionPage from './pages/PassengerSelectionPage';
 import SelectRoomPage from './pages/SelectRoomPage';
 import AddPackagePage from './pages/AddPackagePage';
-
+import InvoicePage from './pages/InvoicePage'
 function App() {
     return (
         <Router>
@@ -23,7 +23,7 @@ function App() {
                 <Route path="/passenger-selection" element={<PassengerSelectionPage />} />
                 <Route path="/select-room" element={<SelectRoomPage />} />
                 <Route path="/add-package" element={<AddPackagePage />} />
-                
+                <Route path="/invoice" element={<InvoicePage />} />         
             </Routes>
         </Router>
     );
