@@ -42,6 +42,18 @@ const PackagePage = () => {
         setPassengerPackages((prev) => ({ ...prev, [passengerid]: data }));
     };
 
+    useEffect(() => {
+        const fetchAllPassengerPackages = async () => {
+            if (!passengers.length) return;
+            for (const passenger of passengers) {
+                await fetchPassengerPackages(passenger.passengerid);
+            }
+        };
+    
+        fetchAllPassengerPackages();
+    }, [passengers]); // 当 passengers 数据变化时触发
+    
+
     // Add package
     const handleAddPackage = async (passengerid, trippackid) => {
         await axios.post(`${process.env.REACT_APP_API_BASE_URL}/package/add-package`, { passengerid, trippackid });
@@ -110,12 +122,16 @@ const PackagePage = () => {
                                                     ${pkg.packcost} ({pkg.pricing_type === 'per_day' ? 'Per Day' : 'Entire Trip'})
                                                 </Typography>
                                                 <Button
-                                                    variant="outlined"
-                                                    sx={{ marginTop: '10px' }}
-                                                    onClick={() => handleAddPackage(passenger.passengerid, pkg.trippackid)}
-                                                >
-                                                    Add
-                                                </Button>
+    variant="outlined"
+    sx={{ marginTop: '10px' }}
+    onClick={() => handleAddPackage(passenger.passengerid, pkg.trippackid)}
+    disabled={
+        (passengerPackages[passenger.passengerid] || []).some((selected) => selected.trippackid === pkg.trippackid)
+    }
+>
+    Add
+</Button>
+
                                             </Card>
                                         ))}
                                     </Box>
