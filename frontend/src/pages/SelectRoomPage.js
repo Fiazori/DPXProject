@@ -12,6 +12,7 @@ const SelectRoomPage = () => {
     const navigate = useNavigate();
     const [searchParams] = useSearchParams();
     const groupid = searchParams.get('groupid');
+    const tripid = searchParams.get('tripid');
     const [error, setError] = useState('');
     const token = getToken();
     const user = token ? jwtDecode(token) : null;
@@ -152,7 +153,7 @@ const handleNext = () => {
         return;
     }
     setErrorMessage(''); // 清除错误
-    navigate(`/next-page?groupid=${groupid}`);
+    navigate(`/add-package?groupid=${groupid}&tripid=${tripid}`);
 };
     return (
         <Box>

@@ -10,7 +10,7 @@ const tripRoutes = require('./api/tripRoutes');
 const passengerRoutes = require('./api/passengerRoute');
 const groupRoutes = require('./api/groupRoutes');
 const roomRoutes = require('./api/roomRoutes');
-
+const packageRoutes = require('./api/packageRoutes');
 
 
 const app = express();
@@ -25,6 +25,7 @@ app.use('/api/trips', tripRoutes);
 app.use('/api/passenger', passengerRoutes);
 app.use('/api/group', groupRoutes);
 app.use('/api/rooms', roomRoutes);
+app.use('/api/package', packageRoutes);
 
 // 加载证书
 const httpsOptions = {
