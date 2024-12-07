@@ -34,7 +34,7 @@ const NavBar = () => {
     const navItems = [
         { label: 'Home', path: '/' },
         { label: 'Find Trip', path: '/findtrip' },
-        { label: '3saffsafsa', path: '/3' },
+        { label: 'Manage Trip', path: '/manage-trip' },
         { label: 'dgsdgsdtgyet', path: '/4' },
         { label: 'rwrwqasr', path: '/5' },
         { label: 'wrwrwq', path: '/6' },

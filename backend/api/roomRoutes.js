@@ -183,6 +183,55 @@ router.post('/remove-passenger', async (req, res) => {
     }
 });
 
+router.post('/delete-passenger', async (req, res) => {
+    const { passengerid, groupid } = req.body;
+
+    if (!passengerid || !groupid) {
+        return res.status(400).json({ message: 'Passenger ID and Group ID are required' });
+    }
+
+    const connection = await db.getConnection(); // Get a connection from the pool
+    try {
+        await connection.query('START TRANSACTION'); // Start transaction
+
+        // Delete the passenger from dpx_passenger
+        await connection.query(`
+            DELETE FROM dpx_passenger
+            WHERE passengerid = ?
+        `, [passengerid]);
+
+        // Delete the passenger's package from dpx_pass_package
+        await connection.query(`
+            DELETE FROM dpx_pass_package
+            WHERE passengerid = ?
+        `, [passengerid]);
+
+        // Recalculate the group size
+        const [[{ group_size }]] = await connection.query(`
+            SELECT COUNT(*) AS group_size
+            FROM dpx_passenger
+            WHERE groupid = ?
+        `, [groupid]);
+
+        // Update the group size in dpx_group
+        await connection.query(`
+            UPDATE dpx_group
+            SET group_size = ?
+            WHERE groupid = ?
+        `, [group_size, groupid]);
+
+        await connection.query('COMMIT'); // Commit transaction
+
+        res.status(200).json({ message: 'Passenger deleted successfully and group size updated', group_size });
+    } catch (err) {
+        await connection.query('ROLLBACK'); // Rollback transaction on error
+        console.error('Failed to delete passenger:', err);
+        res.status(500).json({ message: 'Failed to delete passenger' });
+    } finally {
+        connection.release(); // Release the connection back to the pool
+    }
+});
+
 
 
 module.exports = router;

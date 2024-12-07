@@ -38,23 +38,25 @@ const fetchGroupRooms = async () => {
     }
 };
 
+// Move fetchPassengers to be a standalone function
+const fetchPassengers = async () => {
+    try {
+        setLoading(true);
+        const response = await axios.get(`${process.env.REACT_APP_API_BASE_URL}/group/passengers?groupid=${groupid}`);
+        setPassengers(response.data);
+    } catch (err) {
+        console.error('Failed to fetch passengers:', err);
+    } finally {
+        setLoading(false);
+    }
+};
+
+// Update useEffect to use the fetchPassengers function
 useEffect(() => {
     if (!groupid) {
         console.warn('Group ID is missing, skipping fetch.');
         return;
     }
-
-    const fetchPassengers = async () => {
-        try {
-            setLoading(true);
-            const response = await axios.get(`${process.env.REACT_APP_API_BASE_URL}/group/passengers?groupid=${groupid}`);
-            setPassengers(response.data);
-        } catch (err) {
-            console.error('Failed to fetch passengers:', err);
-        } finally {
-            setLoading(false);
-        }
-    };
 
     const fetchData = async () => {
         await Promise.all([fetchPassengers(), fetchGroupRooms()]);
@@ -62,6 +64,7 @@ useEffect(() => {
 
     fetchData();
 }, [groupid]);
+
 
 
     const fetchRoomTypes = async () => {
@@ -99,6 +102,20 @@ useEffect(() => {
         } catch (err) {
             console.error('Failed to occupy room:', err);
             setError('Failed to add room. It may have been occupied by another user. Please try another room.');
+        }
+    };
+    
+    const handleDeletePassenger = async (passengerid) => {
+        try {
+            await axios.post(`${process.env.REACT_APP_API_BASE_URL}/rooms/delete-passenger`, {
+                passengerid,
+                groupid,
+            });
+            await fetchPassengers(); // Refresh the passenger list after deletion
+            await fetchGroupRooms(); // Refresh the group rooms if necessary
+        } catch (err) {
+            console.error('Failed to delete passenger:', err);
+            setError('Failed to delete passenger. Please try again.');
         }
     };
     
@@ -180,7 +197,15 @@ const handleNext = () => {
             draggable
             onDragStart={(e) => e.dataTransfer.setData('passenger', JSON.stringify(passenger))}
         >
-            <Card sx={{ border: '1px solid #ddd', borderRadius: '8px', padding: '10px', backgroundColor: '#f9f9f9' }}>
+            <Card
+                sx={{
+                    border: '1px solid #ddd',
+                    borderRadius: '8px',
+                    padding: '10px',
+                    backgroundColor: '#f9f9f9',
+                    position: 'relative',
+                }}
+            >
                 <CardContent>
                     <Typography variant="h6">
                         {passenger.fname} {passenger.lname}
@@ -188,11 +213,27 @@ const handleNext = () => {
                     <Typography variant="body2" color="textSecondary">
                         {passenger.email}
                     </Typography>
+                    {/* Delete Button */}
+                    <IconButton
+                        onClick={() => handleDeletePassenger(passenger.passengerid)}
+                        sx={{
+                            position: 'absolute',
+                            top: '8px',
+                            right: '8px',
+                            backgroundColor: '#ffcccc',
+                            '&:hover': {
+                                backgroundColor: '#ff6666',
+                            },
+                        }}
+                    >
+                        <DeleteIcon />
+                    </IconButton>
                 </CardContent>
             </Card>
         </Grid>
     ))}
 </Grid>
+
 
 
                 

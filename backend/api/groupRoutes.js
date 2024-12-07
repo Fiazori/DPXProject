@@ -72,4 +72,30 @@ router.post('/assign', async (req, res) => {
     }
 });
 
+router.get('/saved', async (req, res) => {
+    const { userid } = req.query;
+
+    if (!userid) {
+        return res.status(400).json({ message: 'User ID is required' });
+    }
+
+    try {
+        // 从 dpx_saved_pass 表获取用户保存的乘客信息及其关联的 groupid 和 tripid
+        const [passengers] = await db.execute(`
+            SELECT DISTINCT p.groupid, g.tripid, pi.passinfoid, pi.fname, pi.lname
+            FROM dpx_saved_pass sp
+            JOIN dpx_passenger_info pi ON sp.passinfoid = pi.passinfoid
+            JOIN dpx_passenger p ON pi.passinfoid = p.passinfoid
+            JOIN dpx_group g ON p.groupid = g.groupid
+            WHERE sp.userid = ?
+        `, [userid]);
+
+        res.status(200).json(passengers);
+    } catch (err) {
+        console.error('Failed to fetch saved passengers:', err);
+        res.status(500).json({ message: 'Failed to fetch saved passengers' });
+    }
+});
+
+
 module.exports = router;

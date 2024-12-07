@@ -70,5 +70,46 @@ router.post('/find', async (req, res) => {
     }
 });
 
+// 获取特定 Trip 信息
+router.get('/findid', async (req, res) => {
+    const { tripid } = req.query;
+
+    if (!tripid) {
+        return res.status(400).json({ message: 'Trip ID is required' });
+    }
+
+    try {
+        // 查询 Trip 信息，包括端口名称和途径港口信息
+        const [trip] = await db.execute(`
+            SELECT 
+                T.startdate AS startDate,
+                T.enddate AS endDate,
+                T.night,
+                SP.pname AS startPort,
+                EP.pname AS endPort,
+                (
+                    SELECT GROUP_CONCAT(P.pname ORDER BY TP.sequence_number SEPARATOR ', ')
+                    FROM DPX_TRIP_PORT TP
+                    INNER JOIN DPX_PORT P ON TP.portid = P.portid
+                    WHERE TP.tripid = T.tripid
+                ) AS ports
+            FROM DPX_TRIP T
+            LEFT JOIN DPX_PORT SP ON T.start_port = SP.portid
+            LEFT JOIN DPX_PORT EP ON T.end_port = EP.portid
+            WHERE T.is_active = 'Y' AND T.tripid = ?
+        `, [tripid]);
+
+        if (!trip.length) {
+            return res.status(404).json({ message: 'Trip not found' });
+        }
+
+        // 返回 Trip 数据
+        res.status(200).json(trip[0]);
+    } catch (err) {
+        console.error('Failed to fetch trip details:', err);
+        res.status(500).json({ message: 'Failed to fetch trip details' });
+    }
+});
+
 
 module.exports = router;

@@ -10,6 +10,7 @@ import PassengerSelectionPage from './pages/PassengerSelectionPage';
 import SelectRoomPage from './pages/SelectRoomPage';
 import AddPackagePage from './pages/AddPackagePage';
 import InvoicePage from './pages/InvoicePage'
+import ManageTripPage from './pages/ManageTripPage';
 function App() {
     return (
         <Router>
@@ -24,6 +25,7 @@ function App() {
                 <Route path="/select-room" element={<SelectRoomPage />} />
                 <Route path="/add-package" element={<AddPackagePage />} />
                 <Route path="/invoice" element={<InvoicePage />} />         
+                <Route path="/manage-trip" element={<ManageTripPage />} />    
             </Routes>
         </Router>
     );
