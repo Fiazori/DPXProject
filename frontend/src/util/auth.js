@@ -1,3 +1,5 @@
+import {jwtDecode} from 'jwt-decode';
+
 export const setToken = (token) => {
     localStorage.setItem('token', token);
 };
@@ -11,5 +13,13 @@ export const clearToken = () => {
 };
 
 export const isLoggedIn = () => {
-    return !!getToken();
+    const token = getToken();
+    const user = token ? jwtDecode(token) : null;
+    return !!getToken() && user?.role === 'customer';
+};
+
+export const isELoggedIn = () => {
+    const token = getToken();
+    const user = token ? jwtDecode(token) : null;
+    return !!getToken() && user?.role === 'employee';
 };

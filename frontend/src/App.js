@@ -11,11 +11,16 @@ import SelectRoomPage from './pages/SelectRoomPage';
 import AddPackagePage from './pages/AddPackagePage';
 import InvoicePage from './pages/InvoicePage'
 import ManageTripPage from './pages/ManageTripPage';
+import EHomePage from './pages/EHomePage';
+import ETripPage from './pages/ETripPage';
+
 function App() {
     return (
         <Router>
             <Routes>
                 <Route path="/" element={<HomePage />} />
+                <Route path="/employee" element={<EHomePage />} />
+                <Route path="/ETrip" element={<ETripPage />} />      
                 <Route path="/login" element={<LoginPage />} />
                 <Route path="/signup" element={<SignupPage />} />
                 <Route path="/resetpassword" element={<ResetPasswordPage />} />

@@ -1,16 +1,26 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect  } from 'react';
 import { TextField, Button, Container, Typography, Box, Card, CardContent } from '@mui/material';
 import axios from 'axios';
 import { useNavigate } from 'react-router-dom';
 import { setToken } from '../util/auth';
 import LoginB from '../assets/loginB.jpg';
 import Header from '../components/LogoHeader';
+import { isLoggedIn, isELoggedIn } from '../util/auth';
 
 const LoginPage = () => {
     const [email, setEmail] = useState('');
     const [password, setPassword] = useState('');
     const [error, setError] = useState('');
     const navigate = useNavigate();
+
+    useEffect(() => {
+        // 检查用户是否已经登录，并导航到相应的页面
+        if (isLoggedIn()) {
+            navigate('/');
+        } else if (isELoggedIn()) {
+            navigate('/employee');
+        }
+    }, [navigate]);
 
     const handleLogin = async () => {
         try {

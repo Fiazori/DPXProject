@@ -147,7 +147,7 @@ const PassengerSelectionPage = () => {
     return (
         <Box>
             <NavBar />
-            <Box sx={{ maxWidth: '800px', margin: 'auto', marginTop: '130px' }}>
+            <Box sx={{ maxWidth: '800px', margin: 'auto', marginTop: '120px' }}>
                 <Typography variant="h4" textAlign="center" gutterBottom>
                     Add Passenger to Your Group
                 </Typography>
