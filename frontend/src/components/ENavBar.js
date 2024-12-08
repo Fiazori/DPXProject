@@ -35,7 +35,7 @@ const NavBar = () => {
         { label: 'Home', path: '/employee' },
         { label: 'Trip', path: '/ETrip' },
         { label: 'User', path: '/EUser' },
-        { label: 'Vizualize', path: '/EVizualize' },
+        { label: 'Visualize', path: '/EVisualize' },
     ];
 
     return (

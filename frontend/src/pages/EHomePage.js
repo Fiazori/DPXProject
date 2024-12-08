@@ -16,14 +16,13 @@ const EHomePage = () => {
     const cards = [
         { label: 'Trip', path: '/ETrip', color: '#fff8e1' }, // 更浅的橙色
         { label: 'User', path: '/EUser', color: '#e3f2fd' }, // 更浅的蓝色
-        { label: 'Vizualize', path: '/EVizualize', color: '#e8f5e9' }, // 更浅的绿色
+        { label: 'Visualize', path: '/EVisualize', color: '#e8f5e9' }, // 更浅的绿色
     ];
 
     return (
         <Box>
             {/* 导航栏 */}
             <ENavBar />
-            
             <Box
                 display="flex"
                 justifyContent="space-evenly" // 横向平均铺开

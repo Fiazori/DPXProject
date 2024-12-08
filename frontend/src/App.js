@@ -13,6 +13,8 @@ import InvoicePage from './pages/InvoicePage'
 import ManageTripPage from './pages/ManageTripPage';
 import EHomePage from './pages/EHomePage';
 import ETripPage from './pages/ETripPage';
+import EUserPage from './pages/EUserPage';
+import EVisualizationPage from './pages/EVisualizePage';
 
 function App() {
     return (
@@ -21,6 +23,8 @@ function App() {
                 <Route path="/" element={<HomePage />} />
                 <Route path="/employee" element={<EHomePage />} />
                 <Route path="/ETrip" element={<ETripPage />} />      
+                <Route path="/EUser" element={<EUserPage />} />   
+                <Route path="/EVisualize" element={<EVisualizationPage />} />   
                 <Route path="/login" element={<LoginPage />} />
                 <Route path="/signup" element={<SignupPage />} />
                 <Route path="/resetpassword" element={<ResetPasswordPage />} />
@@ -31,6 +35,7 @@ function App() {
                 <Route path="/add-package" element={<AddPackagePage />} />
                 <Route path="/invoice" element={<InvoicePage />} />         
                 <Route path="/manage-trip" element={<ManageTripPage />} />    
+
             </Routes>
         </Router>
     );

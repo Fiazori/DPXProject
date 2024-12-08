@@ -15,7 +15,10 @@ const invoiceRoutes = require('./api/invoiceRoutes')
 const tripPackageRoutes = require('./api/tripPackageRoutes')
 const tripRestaurantRoutes = require('./api/tripRestaurantRoutes')
 const tripActivityRoutes = require('./api/tripActivityRoutes')
-
+const tripPortRoutes = require('./api/tripPortRoutes')
+const tripRoomRoutes = require('./api/tripRoomRoutes')
+const tripPassengerRoutes = require('./api/tripPassengerRoutes')
+const visualRoutes = require('./api/visualRoutes')
 const app = express();
 
 app.use(cors());
@@ -33,7 +36,10 @@ app.use('/api/invoice', invoiceRoutes);
 app.use('/api/trip-package', tripPackageRoutes);
 app.use('/api/trip-restaurant', tripRestaurantRoutes);
 app.use('/api/trip-activity', tripActivityRoutes);
-
+app.use('/api/trip-port', tripPortRoutes);
+app.use('/api/trip-room', tripRoomRoutes);
+app.use('/api/trip-passenger', tripPassengerRoutes);
+app.use('/api/visual',visualRoutes);
 // 加载证书
 const httpsOptions = {
     key: fs.readFileSync('./cert/server.key'),
