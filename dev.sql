@@ -1,7 +1,6 @@
 CREATE DATABASE DPX_PROJECT;
 USE DPX_PROJECT;
 
-Drop Database DPX_PROJECT;
 -- USERS
 CREATE TABLE DPX_USERS (
     user_id INT AUTO_INCREMENT PRIMARY KEY,
@@ -299,7 +298,6 @@ INSERT INTO DPX_ACTIVITY_FLOOR (actID, FLOOR) VALUES
 (13, '11');
 
 
-
 -- Package 
 INSERT INTO DPX_PACKAGE (packTYPE, packCOST, pricing_TYPE, is_available) VALUES
 ('Water and Non-Alcoholic', 40, 'person/night', 'Y'),
@@ -463,15 +461,59 @@ INSERT INTO DPX_SAVED_PASS (userid, passinfoid) VALUES
 ALTER TABLE DPX_PASS_ROOM
 ADD COLUMN groupid INT AFTER tripid;
 
-select * from DPX_group
-select * from DPX_Passenger
-select * from DPX_Pass_room
-select *from DPX_saved_pass
-select * from dpx_passenger_info
 
-select *from DPX_pass_room
+DELIMITER $$
 
-            SELECT p.passengerid, pi.fname, pi.lname, pi.email
-            FROM dpx_passenger p
-            JOIN dpx_passenger_info pi ON p.passinfoid = pi.passinfoid
-            WHERE p.groupid = 9
+CREATE PROCEDURE DeleteGroup(IN target_groupid INT)
+BEGIN
+    -- 检查是否存在支付记录
+    IF EXISTS (
+        SELECT 1
+        FROM dpx_payment p
+        JOIN dpx_invoice i ON p.inid = i.inid
+        WHERE i.groupid = target_groupid
+    ) THEN
+        SIGNAL SQLSTATE '45000'
+        SET MESSAGE_TEXT = 'Cannot delete group: payment records exist.';
+    END IF;
+
+    START TRANSACTION;
+
+    -- 删除 pass_package
+    DELETE FROM dpx_pass_package
+    WHERE passengerid IN (
+        SELECT passengerid FROM dpx_passenger WHERE groupid = target_groupid
+    );
+
+    -- 删除 invoice
+    DELETE FROM dpx_invoice WHERE groupid = target_groupid;
+
+    -- 更新 room 状态
+    UPDATE dpx_pass_room
+    SET occupancy_status = 'N'
+    WHERE roomid IN (
+        SELECT roomid FROM dpx_passenger WHERE groupid = target_groupid
+    );
+
+    -- 删除 passenger
+    DELETE FROM dpx_passenger WHERE groupid = target_groupid;
+
+    -- 删除 group
+    DELETE FROM dpx_group WHERE groupid = target_groupid;
+
+    COMMIT;
+END$$
+
+DELIMITER ;
+
+ALTER TABLE DPX_TRIP_PORT
+DROP CONSTRAINT C_ARRI_BEFORE_DEPART;
+
+ALTER TABLE DPX_TRIP_PORT
+ADD CONSTRAINT C_ARRI_BEFORE_DEPART
+CHECK (ARRIVALTIME <= DEPARTURETIME);
+
+use dpx_project
+select * from dpx_Passenger_info;
+
+
