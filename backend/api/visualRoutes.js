@@ -63,21 +63,23 @@ router.get('/passenger-distribution', async (req, res) => {
     }
 });
 
-// 获取每日报价单人数
+// 获取每日报价单数量
 router.get('/invoice-count', async (req, res) => {
     const { tripid } = req.query;
     if (!tripid) return res.status(400).send('Missing tripid parameter');
 
     try {
+        // 查询所有与 tripid 相关的报价单日期
         const [invoices] = await pool.query('SELECT duedate FROM dpx_invoice WHERE tripid = ?', [tripid]);
-        const [groups] = await pool.query('SELECT groupid, group_size FROM dpx_group WHERE tripid = ?', [tripid]);
 
+        // 按日统计 inID 数量
         const dateCount = invoices.reduce((acc, invoice) => {
-            const key = new Date(new Date(invoice.duedate).setDate(new Date(invoice.duedate).getDate() - 30))
-                .toISOString()
-                .split('T')[0];
-            const groupSizeSum = groups.reduce((sum, group) => sum + group.group_size, 0);
-            acc[key] = (acc[key] || 0) + groupSizeSum;
+            // 将 duedate 减去一个月
+            const dueDate = new Date(invoice.duedate);
+            const actualDate = new Date(dueDate.setMonth(dueDate.getMonth() - 1)); // 减去一个月
+
+            const key = actualDate.toISOString().split('T')[0]; // 格式化为 YYYY-MM-DD
+            acc[key] = (acc[key] || 0) + 1; // 统计每个日期的 inID 数量
             return acc;
         }, {});
 
@@ -87,5 +89,7 @@ router.get('/invoice-count', async (req, res) => {
         res.status(500).send('Error fetching invoice count data');
     }
 });
+
+
 
 module.exports = router;

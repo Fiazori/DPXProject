@@ -166,7 +166,7 @@ const EVisualizationPage = () => {
         <Tab label="Room Occupancy" />
         <Tab label="Nationality Distribution" />
         <Tab label="Gender Distribution" />
-        <Tab label="Invoice Count" />
+        {/* <Tab label="Invoice Count" /> */}
       </Tabs>
 
       <Box
