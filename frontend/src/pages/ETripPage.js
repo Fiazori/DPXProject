@@ -79,7 +79,7 @@ const ETripAdminPage = () => {
   };
 
   return (
-    <Box sx={{ backgroundColor: '#f0f0f0', minHeight: '100vh' }}>
+    <Box sx={{  minHeight: '100vh' }}>
       <ENavBar />
       <Box display="flex" sx={{ marginTop: '85px' }}>
         {/* 左侧侧边栏 */}
@@ -87,7 +87,7 @@ const ETripAdminPage = () => {
           position="fixed"
           sx={{
             width: '300px',
-            backgroundColor: '#f4f4f4',
+            backgroundColor: 'rgba(217, 217, 217, 0.4)',
             padding: '16px',
             borderRight: '1px solid #ddd',
             height: '100vh',

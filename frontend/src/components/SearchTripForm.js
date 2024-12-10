@@ -42,10 +42,11 @@ const SearchTripForm = ({ onSelectTrip }) => {
             console.error('Failed to search trips:', err);
         }
     };
-
+{/* <ThemeProvider theme={localTheme}></ThemeProvider> */}
     return (
         <Box>
             {/* 搜索表单 */}
+            
             <Box display="flex" gap={2} flexWrap="wrap" mb={2}>
                 <TextField
                     label="Trip ID"

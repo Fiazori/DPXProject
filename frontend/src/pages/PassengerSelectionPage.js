@@ -52,7 +52,7 @@ const PassengerSelectionPage = () => {
             }
         };
         fetchSavedPassengers();
-    }, [user]);
+    }, [user?.user_id]);
 
     // Validate new passenger form
     const validateForm = () => {

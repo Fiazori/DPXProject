@@ -292,7 +292,7 @@ const handleNext = () => {
                                 >
                                     <ListItemText
                                         primary={`${roomType.type} - ${roomType.emptyRooms} Available`}
-                                        secondary={`${roomType.bed} beds - Starting at $${roomType.minPrice}`}
+                                        secondary={`${roomType.bed} beds - Starting at $${roomType.minPrice} / person`}
                                     />
                                 </ListItem>
                             ))}
@@ -325,7 +325,7 @@ const handleNext = () => {
                         Facing: {room.location_side}
                     </Typography>
                     <Typography variant="h6" sx={{ color: 'primary.main', fontWeight: 'bold' }}>
-                        Price: ${room.price}
+                        Price: ${room.price} / person
                     </Typography>
                 </CardContent>
                 <Button
@@ -383,7 +383,7 @@ const handleNext = () => {
                         Type: {room.type}
                     </Typography>
                     <Typography variant="body2" color="textSecondary">
-                        Price: ${room.price}
+                        Price: ${room.price} / person
                     </Typography>
 
                     {/* 显示乘客列表 */}

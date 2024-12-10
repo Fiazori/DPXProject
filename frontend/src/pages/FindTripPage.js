@@ -128,46 +128,75 @@ const FindTripPage = () => {
             )}
 
             {/* 行程结果展示 */}
-            <Box sx={{ marginTop: '30px' }}>
+            <Box sx={{ width: '70%', marginTop: '30px' }}>
                 {trips.length === 0 ? (
                     <Typography variant="body1" textAlign="center" color="textSecondary">
                         No trips found.
                     </Typography>
                 ) : (
-                    <Typography variant="body1" textAlign="left" color="textSecondary" sx={{ marginBottom: '20px' }}>
+                    <Typography variant="body1" textAlign="center" color="textSecondary" sx={{ marginBottom: '20px' }}>
                         Found {trips.length} trips.
                     </Typography>
                 )}
-<Grid container spacing={3} sx={{ width: '80%', margin: '0 auto' }}>
-    {trips.map((trip) => {
-        const portsArray = trip.ports ? trip.ports.split(', ') : []; // 将逗号分隔的字符串转换为数组
-        return (
-            <Grid item xs={12} sm={6} key={trip.tripid}
-            onClick={() => navigate(`/passenger-selection?tripid=${trip.tripid}`)}>
-                <Card sx={{ display: 'flex', flexDirection: 'row', p: 2, 
-                            boxShadow: '0px 4px 10px rgba(0, 0, 0, 0.3)', borderRadius: '12px',
-                            }}>
-                    <Box sx={{ width: '100%', display: 'flex', flexDirection: 'column', justifyContent: 'center' }}>
-                        <Typography variant="h6" gutterBottom>
-                            {trip.start_port_name} → {trip.end_port_name}
-                        </Typography>
-                        <Typography variant="body1">{trip.night} Nights</Typography>
-                        <Typography variant="body2" color="textSecondary">
-                            {new Date(trip.startdate).toLocaleDateString()} - {new Date(trip.enddate).toLocaleDateString()}
-                        </Typography>
-                        <Divider sx={{ my: 1 }} />
-                        <Typography variant="body2">
-                            Stops: 
-                        </Typography>
-                        <Typography variant="body2">
-                            {portsArray.join(' → ')}
-                        </Typography>
-                    </Box>
-                </Card>
-            </Grid>
-        );
-    })}
-</Grid>
+{trips.length === 1 ? (
+    <Grid container spacing={3} sx={{ width: '50%', margin: '0 auto', justifyContent: 'center' }}>
+        <Grid item xs={12} sm={8}
+        onClick={() => navigate(`/passenger-selection?tripid=${trips[0].tripid}`)}>
+            <Card sx={{ display: 'flex', flexDirection: 'row', p: 2, 
+                        boxShadow: '0px 4px 10px rgba(0, 0, 0, 0.3)', borderRadius: '12px',
+                        }}>
+                <Box sx={{ width: '100%', display: 'flex', flexDirection: 'column', justifyContent: 'center' }}>
+                    <Typography variant="h6" gutterBottom>
+                        {trips[0].start_port_name} → {trips[0].end_port_name}
+                    </Typography>
+                    <Typography variant="body1">{trips[0].night} Nights</Typography>
+                    <Typography variant="body2" color="textSecondary">
+                        {new Date(trips[0].startdate).toLocaleDateString()} - {new Date(trips[0].enddate).toLocaleDateString()}
+                    </Typography>
+                    <Divider sx={{ my: 1 }} />
+                    <Typography variant="body2">
+                        Stops: 
+                    </Typography>
+                    <Typography variant="body2">
+                        {trips[0].ports ? trips[0].ports.split(', ').join(' → ') : ''}
+                    </Typography>
+                </Box>
+            </Card>
+        </Grid>
+    </Grid>
+) : (
+    <Grid container spacing={3} sx={{ width: '80%', margin: '0 auto' }}>
+        {trips.map((trip) => {
+            const portsArray = trip.ports ? trip.ports.split(', ') : [];
+            return (
+                <Grid item xs={12} sm={6} key={trip.tripid}
+                onClick={() => navigate(`/passenger-selection?tripid=${trip.tripid}`)}>
+                    <Card sx={{ display: 'flex', flexDirection: 'row', p: 2, 
+                                boxShadow: '0px 4px 10px rgba(0, 0, 0, 0.3)', borderRadius: '12px',
+                                }}>
+                        <Box sx={{ width: '100%', display: 'flex', flexDirection: 'column', justifyContent: 'center' }}>
+                            <Typography variant="h6" gutterBottom>
+                                {trip.start_port_name} → {trip.end_port_name}
+                            </Typography>
+                            <Typography variant="body1">{trip.night} Nights</Typography>
+                            <Typography variant="body2" color="textSecondary">
+                                {new Date(trip.startdate).toLocaleDateString()} - {new Date(trip.enddate).toLocaleDateString()}
+                            </Typography>
+                            <Divider sx={{ my: 1 }} />
+                            <Typography variant="body2">
+                                Stops: 
+                            </Typography>
+                            <Typography variant="body2">
+                                {portsArray.join(' → ')}
+                            </Typography>
+                        </Box>
+                    </Card>
+                </Grid>
+            );
+        })}
+    </Grid>
+)}
+
 
 
                 </Box>

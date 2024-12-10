@@ -132,7 +132,7 @@ const EVisualizationPage = () => {
   };
 
   return (
-    <Box sx={{ padding: '16px', backgroundColor: '#f0f0f0', minHeight: '90vh', marginTop: '90px' }}>
+    <Box sx={{ padding: '16px', minHeight: '90vh', marginTop: '90px' }}>
       <ENavBar />
       <Box sx={{ textAlign: 'center', marginBottom: '24px' }}>
         <Typography variant="h4" gutterBottom>

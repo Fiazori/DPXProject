@@ -22,7 +22,7 @@ const Sidebar = () => {
         <Box
             sx={{
                 width: '220px',
-                backgroundColor: '#f4f4f4',
+                backgroundColor: 'rgba(217, 217, 217, 0.5)',
                 boxShadow: '2px 0 5px rgba(0, 0, 0, 0.1)',
                 padding: '20px 10px', // 添加顶部、底部和左右的间距
                 position: 'fixed', // 固定在左侧
