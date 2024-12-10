@@ -15,8 +15,9 @@ router.post('/create-or-update', async (req, res) => {
     try {
         // 获取房间价格总计
         const [rooms] = await db.execute(`
-            SELECT SUM(r.price) AS totalRoomCost
+            SELECT SUM(r.price * s.bed) AS totalRoomCost
             FROM dpx_pass_room r
+            JOIN dpx_stateroom s ON r.sid = s.sid
             WHERE r.roomid IN (
                 SELECT DISTINCT roomid
                 FROM dpx_passenger
@@ -88,11 +89,12 @@ router.get('/details', async (req, res) => {
     try {
         // 获取房间明细
         const [roomDetails] = await db.execute(`
-            SELECT DISTINCT r.roomid, r.roomnumber, CAST(r.price AS DECIMAL(10,2)) AS price
+            SELECT DISTINCT r.roomid, r.roomnumber, CAST(r.price * s.bed AS DECIMAL(10,2)) AS price
             FROM dpx_pass_room r
             JOIN dpx_passenger p ON p.roomid = r.roomid
+            JOIN dpx_stateroom s ON r.sid = s.sid
             WHERE p.groupid = ?
-        `, [groupid]);
+        `, [groupid]);;
 
         const totalRoomCost = roomDetails.reduce((sum, room) => sum + parseFloat(room.price || 0), 0);
 
