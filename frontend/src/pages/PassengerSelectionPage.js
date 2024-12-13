@@ -256,7 +256,10 @@ const PassengerSelectionPage = () => {
                         onClick={handleCreatePassenger}
                         disabled={loading}
                         fullWidth
-                    >
+                        sx={{
+                            marginTop: '20px',
+                        }}
+                            >
                         {loading ? 'Saving...' : 'Save'}
                     </Button>
                 </Box>

@@ -57,25 +57,22 @@ const HomePage = () => {
                     zIndex: 1,
                 }}
             >
-                <Typography variant="h2" sx={{ color: 'white', textShadow: '0 4px 4px rgba(0, 0, 0, 0.8)', fontWeight:"bold"}}>
-                Your Journey Begins Here
-                </Typography>
-            </Box>
+<Typography
+    variant="h2"
+    sx={{
+        color: 'white',
+        textShadow: '0 4px 4px rgba(0, 0, 0, 0.8)',
+        fontWeight: 'bold',
+        animation: 'fadeIn 2s ease-in-out',
+        '@keyframes fadeIn': {
+            '0%': { opacity: 0 },
+            '100%': { opacity: 1 },
+        },
+    }}
+>
+    Your Journey Begins Here
+</Typography>
 
-            {/* 示例其他内容 */}
-            <Box
-                display="flex"
-                justifyContent="center"
-                alignItems="center"
-                height="100vh"
-                sx={{
-                    position: 'relative',
-                    zIndex: 1,
-                }}
-            >
-                <Typography variant="h4" sx={{ color: 'white', textShadow: '0 2px 4px rgba(0, 0, 0, 0.8)' }}>
-                    Scroll down for more
-                </Typography>
             </Box>
         </Box>
     );

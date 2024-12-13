@@ -303,4 +303,60 @@ router.post('/update', async (req, res) => {
     }
 });
 
+router.get('/get-detail', async (req, res) => {
+    const { tripid } = req.query;
+
+    if (!tripid) {
+        return res.status(400).json({ message: 'Trip ID is required.' });
+    }
+
+    try {
+        const [restaurants] = await db.execute(
+            `
+            SELECT r.resID, r.resName, r.resType, r.resStarttime, r.resEndtime, r.resFloor
+            FROM dpx_trip_restaurant tr
+            JOIN dpx_restaurant r ON tr.resid = r.resID
+            WHERE tr.tripid = ?
+            `,
+            [tripid]
+        );
+
+        const [activitiesRaw] = await db.execute(
+            `
+            SELECT a.actID, a.actName, a.Unit, af.floor AS floor
+            FROM dpx_trip_activity ta
+            JOIN dpx_activity a ON ta.actID = a.actID
+            JOIN dpx_activity_floor af ON ta.actID = af.actID
+            WHERE ta.tripid = ?
+            `,
+            [tripid]
+        );
+
+        // 聚合活动数据
+        const activities = Object.values(
+            activitiesRaw.reduce((acc, activity) => {
+                if (!acc[activity.actID]) {
+                    acc[activity.actID] = {
+                        actID: activity.actID,
+                        actName: activity.actName,
+                        Unit: activity.Unit,
+                        floors: [],
+                    };
+                }
+                acc[activity.actID].floors.push(activity.floor);
+                return acc;
+            }, {})
+        );
+
+        res.json({
+            restaurants,
+            activities,
+        });
+    } catch (error) {
+        console.error(error);
+        res.status(500).json({ message: 'Failed to fetch trip details.' });
+    }
+});
+
+
 module.exports = router;

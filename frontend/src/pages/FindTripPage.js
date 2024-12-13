@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Box, Button, TextField, Typography, Grid, Card, CardContent, Divider } from '@mui/material';
+import { Box, Button, TextField, Typography, Grid, Card, CardContent, Divider, Dialog, DialogTitle, DialogContent, DialogActions  } from '@mui/material';
 import NavBar from '../components/NavBar';
 import axios from 'axios';
 import { useNavigate } from 'react-router-dom';
@@ -12,6 +12,10 @@ const FindTripPage = () => {
     const [night, setNight] = useState('');
     const [trips, setTrips] = useState([]);
     const [error, setError] = useState('');
+    const [selectedTrip, setSelectedTrip] = useState(null);
+    const [tripDetails, setTripDetails] = useState(null); 
+    const [isDialogOpen, setIsDialogOpen] = useState(false);
+
     const navigate = useNavigate();
 
     // 查询行程
@@ -32,6 +36,25 @@ const FindTripPage = () => {
         }
     };
 
+    const handleCardClick = async (trip) => {
+        setSelectedTrip(trip);
+        try {
+            const response = await axios.get(`${process.env.REACT_APP_API_BASE_URL}/trips/get-detail`, {
+                params: { tripid: trip.tripid },
+            });
+            setTripDetails(response.data);
+            setIsDialogOpen(true);
+        } catch (err) {
+            console.error(err);
+            setError(err.response?.data?.message || 'Failed to fetch trip details');
+        }
+    };
+    
+    const handleCloseDialog = () => {
+        setIsDialogOpen(false);
+        setTripDetails(null);
+    };
+
     return (
         <Box>
             <NavBar />
@@ -39,6 +62,48 @@ const FindTripPage = () => {
                 <Typography variant="h4" mb={3} textAlign="center">
                     Find Your Perfect Trip
                 </Typography>
+                <Dialog open={isDialogOpen} onClose={handleCloseDialog} fullWidth maxWidth="md">
+    <DialogTitle>Trip Details</DialogTitle>
+    <DialogContent>
+        {tripDetails ? (
+            <Box>
+                <Typography variant="h6">{selectedTrip.start_port_name} → {selectedTrip.end_port_name}</Typography>
+                <Typography variant="body2" color="textSecondary">
+                    {new Date(selectedTrip.startdate).toLocaleDateString()} - {new Date(selectedTrip.enddate).toLocaleDateString()}
+                </Typography>
+                <Typography variant="h6">Activities:</Typography>
+                {tripDetails.activities.length > 0 ? (
+                    tripDetails.activities.map((activity) => (
+                        <Typography variant="body2" key={activity.actID}>
+                            {activity.actName}  Floors: {activity.floors.join(', ')}
+                        </Typography>
+                    ))
+                ) : (
+                    <Typography variant="body2">No activities available.</Typography>
+                )}
+                <Divider sx={{ my: 2 }} />
+                <Typography variant="h6">Restaurants:</Typography>
+                {tripDetails.restaurants.length > 0 ? (
+                    tripDetails.restaurants.map((restaurant) => (
+                        <Typography variant="body2" key={restaurant.resID}>
+                            {restaurant.resName} ({restaurant.resType}), Open: {restaurant.resStarttime} - {restaurant.resEndtime}, Floor: {restaurant.resFloor}
+                        </Typography>
+                    ))
+                ) : (
+                    <Typography variant="body2">No restaurants available.</Typography>
+                )}
+            </Box>
+        ) : (
+            <Typography>Loading...</Typography>
+        )}
+    </DialogContent>
+    <DialogActions>
+        <Button onClick={handleCloseDialog} color="secondary">Close</Button>
+        <Button onClick={() => navigate(`/passenger-selection?tripid=${selectedTrip.tripid}`)} color="primary" variant="contained">
+            Select
+        </Button>
+    </DialogActions>
+</Dialog>
 
             {/* 搜索区域 */}
             <Box
@@ -170,7 +235,7 @@ const FindTripPage = () => {
             const portsArray = trip.ports ? trip.ports.split(', ') : [];
             return (
                 <Grid item xs={12} sm={6} key={trip.tripid}
-                onClick={() => navigate(`/passenger-selection?tripid=${trip.tripid}`)}>
+                onClick={() => handleCardClick(trip)}>
                     <Card sx={{ display: 'flex', flexDirection: 'row', p: 2, 
                                 boxShadow: '0px 4px 10px rgba(0, 0, 0, 0.3)', borderRadius: '12px',
                                 }}>
